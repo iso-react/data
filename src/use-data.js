@@ -90,7 +90,6 @@ function useRequest(getPromise, props, opts) {
   }, [cacheKey]);
 
   const fetchData = (fetchProps = props, newOpts = opts) => {
-    console.log(fetchProps);
     if (!isMounted.current) return Promise.resolve();
     const revisedCacheKey = getKey(client, newOpts.hash, fetchProps);
 
@@ -129,6 +128,7 @@ function useRequest(getPromise, props, opts) {
 }
 
 function useData(getPromise, props = [], opts = {}) {
+  console.log(props);
   const actualProps = typeof props === 'object' ? [] : props;
   const actualOpts = typeof props === 'object' ? props : opts;
   if (!getPromise || typeof getPromise !== 'function') {
