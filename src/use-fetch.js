@@ -11,10 +11,9 @@ const improvedFetch = (url, opts = {}) => {
 };
 
 const fetchJSON = ({url, ...opts}) => {
-  console.log('fetching '+url);
   return improvedFetch(url, opts).then(response => response.json());
 };
 
 export function useFetchJson(url, opts = {}, dataOpts = {}) {
-  return useData(fetchJSON, {url, ...opts}, dataOpts);
+  return useData(fetchJSON, [{url, ...opts}], dataOpts);
 }

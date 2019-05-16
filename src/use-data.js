@@ -111,7 +111,7 @@ function useRequest(getPromise, props, opts) {
     });
 
     return new Promise(resolve => {
-      getPromise(fetchProps)
+      getPromise(...fetchProps)
         .then(data => {
           client.cache.set(revisedCacheKey, {data});
           dispatch({type: actions.data, data});
@@ -127,7 +127,9 @@ function useRequest(getPromise, props, opts) {
   return [fetchData, state];
 }
 
-function useData(getPromise, props = {}, opts = {}) {
+function useData(getPromise, props = [], opts = {}) {
+  const actualProps = typeof props === 'object' ? [] : props;
+  const actualOpts = typeof props === 'object' ? props : opts;
   if (!getPromise || typeof getPromise !== 'function') {
     throw new Error('A promise getter is required for useData');
   }
@@ -145,7 +147,7 @@ function useData(getPromise, props = {}, opts = {}) {
   }
 
   const [ssrRequest, setSsrRequest] = React.useState(false);
-  const [fetch, state] = useRequest(getPromise, props, opts);
+  const [fetch, state] = useRequest(getPromise, actualProps, actualOpts);
 
   if (client.ssrMode && opts.ssr !== false && !ssrRequest) {
     setSsrRequest(true);
