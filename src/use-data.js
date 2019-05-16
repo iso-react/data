@@ -90,6 +90,7 @@ function useRequest(getPromise, props, opts) {
   }, [cacheKey]);
 
   const fetchData = (fetchProps = props, newOpts = opts) => {
+    console.log(fetchProps);
     if (!isMounted.current) return Promise.resolve();
     const revisedCacheKey = getKey(client, newOpts.hash, fetchProps);
 
