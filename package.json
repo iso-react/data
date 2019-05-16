@@ -8,9 +8,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build:cjs": "babel src -d dist",
+    "build:es": "cross-env ES=true babel src -d dist/es",
+    "build": "npm-run-all -s clean build:*",
     "lint": "semistandard src/*.js",
-    "test": "echo \"Warning: no test specified\""
+    "test": "echo \"Warning: no test specified\"",
+    "clean": "rimraf dist"
   },
   "repository": {
     "type": "git",
@@ -33,6 +36,7 @@
   },
   "homepage": "https://github.com/iso-react/data#readme",
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
@@ -40,6 +44,8 @@
     "@semantic-release/github": "^5.2.10",
     "@semantic-release/npm": "^5.1.4",
     "@semantic-release/release-notes-generator": "^7.1.4",
+    "cross-env": "^5.2.0",
+    "npm-run-all": "^4.1.5",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0",
     "rollup": "^1.11.2",
