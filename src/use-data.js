@@ -61,6 +61,7 @@ const getKey = (client, hasher, props) => {
 };
 
 function useRequest(getPromise, props, opts) {
+  console.log(props);
   const client = React.useContext(DataContext);
 
   const currentCacheKey = React.useRef(null);
@@ -128,9 +129,9 @@ function useRequest(getPromise, props, opts) {
 }
 
 function useData(getPromise, props = [], opts = {}) {
-  console.log(props);
   const actualProps = typeof props === 'object' ? [] : props;
   const actualOpts = typeof props === 'object' ? props : opts;
+  console.log(actualProps);
   if (!getPromise || typeof getPromise !== 'function') {
     throw new Error('A promise getter is required for useData');
   }
@@ -150,7 +151,7 @@ function useData(getPromise, props = [], opts = {}) {
   const [ssrRequest, setSsrRequest] = React.useState(false);
   const [fetch, state] = useRequest(getPromise, actualProps, actualOpts);
 
-  if (client.ssrMode && opts.ssr !== false && !ssrRequest) {
+  if (client.ssrMode && actualOpts.ssr !== false && !ssrRequest) {
     setSsrRequest(true);
     if (!state.data && !state.error) {
       const promise = fetch();
@@ -158,8 +159,7 @@ function useData(getPromise, props = [], opts = {}) {
     }
   }
 
-  const key = getKey(client, opts.hash, props);
-  const stringifiedProps = JSON.stringify(props);
+  const key = getKey(client, actualOpts.hash, actualProps);
   React.useEffect(() => {
     fetch();
   }, [key]);
@@ -170,7 +170,7 @@ function useData(getPromise, props = [], opts = {}) {
       loading: state.loading,
       error: state.error,
     },
-    (newProps = props) => {
+    (newProps = actualProps) => {
       fetch(newProps, {
         skipCache: true,
       });
