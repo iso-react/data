@@ -1,8 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import useData from './use-data';
 
-const improvedFetch = (url, opts = {}) => {
-  return fetch(url, opts).then(response => {
+const fetchResponse = (opts = {}) => {
+  return fetch(opts.url, opts).then(response => {
     if (!response.ok || response >= 400) {
       throw new Error(response.statusText);
     }
@@ -10,10 +10,21 @@ const improvedFetch = (url, opts = {}) => {
   });
 };
 
-const fetchJSON = ({url, ...opts}) => {
-  return improvedFetch(url, opts).then(response => response.json());
+const useFetch = {
+  json: function(url, opts, dataOpts) {
+    return useData(
+      (...args) => fetchResponse(...args).then(resp => resp.json()),
+      [{url, ...opts}],
+      dataOpts
+    );
+  },
+  text: function(url, opts, dataOpts) {
+    return useData(
+      (...args) => fetchResponse(...args).then(resp => resp.text()),
+      [{url, ...opts}],
+      dataOpts
+    );
+  },
 };
 
-export function useFetchJson(url, opts = {}, dataOpts = {}) {
-  return useData(fetchJSON, [{url, ...opts}], dataOpts);
-}
+export default useFetch;

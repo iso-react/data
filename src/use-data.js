@@ -61,7 +61,6 @@ const getKey = (client, hasher, props) => {
 };
 
 function useRequest(getPromise, props, opts) {
-  console.log(props);
   const client = React.useContext(DataContext);
 
   const currentCacheKey = React.useRef(null);
@@ -71,14 +70,17 @@ function useRequest(getPromise, props, opts) {
 
   const initialCacheHit = !opts.skipCache ? client.cache.get(cacheKey) : null;
   const isDeferred = !!opts.defer;
-
   const initialState = {
     ...initialCacheHit,
     cacheHit: !!initialCacheHit,
     loading: isDeferred ? false : !initialCacheHit,
   };
-  const [state, dispatch] = React.useReducer(reducer, initialState);
 
+  const [state, dispatch] = React.useReducer((...args) => {
+    const result = reducer(...args);
+    return result;
+  }, initialState);
+  
   React.useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -112,7 +114,7 @@ function useRequest(getPromise, props, opts) {
     });
 
     return new Promise(resolve => {
-      getPromise(...fetchProps)
+      return getPromise(...fetchProps)
         .then(data => {
           client.cache.set(revisedCacheKey, {data});
           dispatch({type: actions.data, data});
@@ -125,13 +127,15 @@ function useRequest(getPromise, props, opts) {
         });
     });
   };
+
   return [fetchData, state];
 }
 
 function useData(getPromise, props = [], opts = {}) {
-  const actualProps = typeof props === 'object' ? [] : props;
-  const actualOpts = typeof props === 'object' ? props : opts;
-  console.log(actualProps);
+  const actualProps = !Array.isArray(props) ? [] : props;
+  const actualOpts =
+    !Array.isArray(props) && typeof props === 'object' ? props : opts;
+
   if (!getPromise || typeof getPromise !== 'function') {
     throw new Error('A promise getter is required for useData');
   }
