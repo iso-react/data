@@ -11,20 +11,20 @@ const fetchResponse = (opts = {}) => {
 };
 
 const useFetch = {
-  json: function(url, opts, dataOpts) {
+  json: function (url, opts, dataOpts) {
     return useData(
       (...args) => fetchResponse(...args).then(resp => resp.json()),
-      [{url, ...opts}],
+      [{ url, ...opts }],
       dataOpts
     );
   },
-  text: function(url, opts, dataOpts) {
+  text: function (url, opts, dataOpts) {
     return useData(
       (...args) => fetchResponse(...args).then(resp => resp.text()),
-      [{url, ...opts}],
+      [{ url, ...opts }],
       dataOpts
     );
-  },
+  }
 };
 
 export default useFetch;

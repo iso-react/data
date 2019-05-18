@@ -2,7 +2,7 @@ import LRU from 'tiny-lru';
 import fnv1a from '@sindresorhus/fnv1a';
 
 class DataCache {
-  constructor({size = 100, ttl = 0, initialState = {}} = {}) {
+  constructor ({ size = 100, ttl = 0, initialState = {} } = {}) {
     this.lru = LRU(size, ttl);
     Object.entries(initialState).forEach(([key, val]) => {
       this.lru.set(key, val);
@@ -16,35 +16,35 @@ class DataCache {
     this.getInitialState = this._getInitialState.bind(this);
   }
 
-  _getKey(obj) {
+  _getKey (obj) {
     return fnv1a(JSON.stringify(obj)).toString(36);
   }
 
-  _get(obj) {
+  _get (obj) {
     return this.lru.get(obj);
   }
 
-  _set(obj, data) {
+  _set (obj, data) {
     this.lru.set(obj, data);
   }
 
-  _delete(obj) {
+  _delete (obj) {
     this.lru.delete(obj);
   }
 
-  _clear() {
+  _clear () {
     this.lru.clear();
   }
 
-  _keys() {
+  _keys () {
     return this.lru.keys();
   }
 
-  _getInitialState() {
+  _getInitialState () {
     return this._keys().reduce(
       (initialState, key) => ({
         ...initialState,
-        [key]: this.lru.get(key),
+        [key]: this.lru.get(key)
       }),
       {}
     );

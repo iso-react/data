@@ -6,7 +6,7 @@ const actions = {
   loading: 'loading',
   cacheHit: 'cacheHit',
   error: 'error',
-  data: 'data',
+  data: 'data'
 };
 
 const reducer = (state, action) => {
@@ -19,7 +19,7 @@ const reducer = (state, action) => {
       }
       return {
         ...state,
-        loading: true,
+        loading: true
       };
     case actions.cacheHit:
       if (state.cacheHit) {
@@ -28,19 +28,19 @@ const reducer = (state, action) => {
       return {
         ...action.result,
         cacheHit: true,
-        loading: false,
+        loading: false
       };
     case actions.error:
       return {
         error: action.error,
         cacheHit: false,
-        loading: false,
+        loading: false
       };
     case actions.data:
       return {
         data: action.data,
         cacheHit: false,
-        loading: false,
+        loading: false
       };
     default:
       return state;
@@ -60,7 +60,7 @@ const getKey = (client, hasher, props) => {
   return hasher;
 };
 
-function useRequest(getPromise, props, opts) {
+function useRequest (getPromise, props, opts) {
   const client = React.useContext(DataContext);
 
   const currentCacheKey = React.useRef(null);
@@ -73,14 +73,14 @@ function useRequest(getPromise, props, opts) {
   const initialState = {
     ...initialCacheHit,
     cacheHit: !!initialCacheHit,
-    loading: isDeferred ? false : !initialCacheHit,
+    loading: isDeferred ? false : !initialCacheHit
   };
 
   const [state, dispatch] = React.useReducer((...args) => {
     const result = reducer(...args);
     return result;
   }, initialState);
-  
+
   React.useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -89,7 +89,7 @@ function useRequest(getPromise, props, opts) {
   }, []);
 
   React.useEffect(() => {
-    dispatch({type: actions.reset, initialState});
+    dispatch({ type: actions.reset, initialState });
   }, [cacheKey]);
 
   const fetchData = (fetchProps = props, newOpts = opts) => {
@@ -104,25 +104,25 @@ function useRequest(getPromise, props, opts) {
     if (cacheHit) {
       dispatch({
         type: actions.cacheHit,
-        result: cacheHit,
+        result: cacheHit
       });
       return Promise.resolve(cacheHit);
     }
 
     dispatch({
-      type: actions.loading,
+      type: actions.loading
     });
 
     return new Promise(resolve => {
       return getPromise(...fetchProps)
         .then(data => {
-          client.cache.set(revisedCacheKey, {data});
-          dispatch({type: actions.data, data});
+          client.cache.set(revisedCacheKey, { data });
+          dispatch({ type: actions.data, data });
           resolve(data);
         })
         .catch(error => {
-          client.cache.set(revisedCacheKey, {error});
-          dispatch({type: actions.error, error});
+          client.cache.set(revisedCacheKey, { error });
+          dispatch({ type: actions.error, error });
           resolve(error);
         });
     });
@@ -131,7 +131,7 @@ function useRequest(getPromise, props, opts) {
   return [fetchData, state];
 }
 
-function useData(getPromise, props = [], opts = {}) {
+function useData (getPromise, props = [], opts = {}) {
   const actualProps = !Array.isArray(props) ? [] : props;
   const actualOpts =
     !Array.isArray(props) && typeof props === 'object' ? props : opts;
@@ -153,13 +153,26 @@ function useData(getPromise, props = [], opts = {}) {
   }
 
   const [ssrRequest, setSsrRequest] = React.useState(false);
+  const [suspenseRequest, setSuspenseRequest] = React.useState(false);
   const [fetch, state] = useRequest(getPromise, actualProps, actualOpts);
 
-  if (client.ssrMode && actualOpts.ssr !== false && !ssrRequest) {
+  // If client suspense is not set
+  // and client is set to SSR mode,
+  // handle SSR data fetching
+  if (!client.suspense && client.ssrMode && actualOpts.ssr !== false && !ssrRequest) {
     setSsrRequest(true);
     if (!state.data && !state.error) {
       const promise = fetch();
       client.ssrPromises.push(promise);
+    }
+  }
+
+  // Handle suspense requests
+  if (client.suspense && actualOpts.suspend !== false && !suspenseRequest) {
+    setSuspenseRequest(true);
+    if (!state.data && !state.error) {
+      const promise = fetch();
+      throw promise;
     }
   }
 
@@ -172,13 +185,13 @@ function useData(getPromise, props = [], opts = {}) {
     state.data,
     {
       loading: state.loading,
-      error: state.error,
+      error: state.error
     },
     (newProps = actualProps) => {
       fetch(newProps, {
-        skipCache: true,
+        skipCache: true
       });
-    },
+    }
   ];
 }
 
